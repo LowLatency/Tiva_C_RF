@@ -43,6 +43,10 @@ void setup()
   pinMode(SW[0], INPUT_PULLUP);
   pinMode(SW[1], INPUT_PULLUP);
 }
+
+// Used for input conversion
+char Temp[] = "Monica";
+
 void printRxData()
 {
   /**
@@ -68,26 +72,44 @@ void printTxData()
 }
 
 
+
 void loop()
 {
-  char Temp[] = "Nik Sux";
+  
   
   Serial.println("Scan");
-  digitalWrite(LED[0], LOW);
-  if (Radio.receiverOn((unsigned char*)&rxPacket, sizeof(rxPacket), 100) > 0)
+  
+  digitalWrite(LED[0], HIGH);
+  if (Radio.receiverOn((unsigned char*)&rxPacket, sizeof(rxPacket), 500) > 0)
   {
+    
     Serial.print("FROM: ");
     Serial.print(rxPacket.node);
     Serial.print(" MSG: ");
     Serial.println((char*)rxPacket.msg);
-    digitalWrite(LED[0], HIGH);
   }
   digitalWrite(LED[0], LOW);
   
   
   
   
-  Serial.println("Transmitt");
+  Serial.println("Transmit");
+  Serial.println("5 seconds to enter message");
+  delay(5000);
+  Serial.println("Loading...");
+
+  
+  if(Serial.available() > 0)
+  {
+    for(int i = 0 ; i < 59 ; i++ )
+    {
+      Temp[i] = Serial.read();
+//      if(Serial.read() == '\0')
+//      {
+//        i = 60;
+//      }
+    }
+  }
   int T = 0;
   
   // Convert String to output format txPacket.msg
@@ -97,9 +119,9 @@ void loop()
     {
       txPacket.msg[i] = Temp[i];
     }
-    for(int i = sizeof(Temp) ; i < 59 ; i++ )
+    for(int i = sizeof(Temp)+1 ; i < 59 ; i++ )
     {
-      txPacket.msg[i] = 'N';
+      txPacket.msg[i] = ' ';
     }
   }
   if(sizeof(Temp) >= 59)
@@ -109,12 +131,13 @@ void loop()
       txPacket.msg[i] = Temp[i];
     }
   }
-  Serial.print("Transmitting: ");
+  Serial.print("Transmitting: \"");
+  digitalWrite(LED[3], HIGH);
   Serial.print((char*) txPacket.msg);
-  Serial.print(" Packet size: ");
+  Serial.print("\" Packet size: ");
   Serial.println(sizeof(txPacket));
   Radio.transmit(ADDRESS_HUB, (unsigned char*)&txPacket, sizeof(txPacket)); 
-  
+  digitalWrite(LED[3], LOW);
   
 }
 
