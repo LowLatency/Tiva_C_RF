@@ -45,7 +45,7 @@ void setup()
 }
 
 // Used for input conversion
-char Temp[] = "Monica";
+char Temp[59];
 
 void printRxData()
 {
@@ -101,36 +101,18 @@ void loop()
   
   if(Serial.available() > 0)
   {
-    for(int i = 0 ; i < 59 ; i++ )
-    {
-      Temp[i] = Serial.read();
-//      if(Serial.read() == '\0')
-//      {
-//        i = 60;
-//      }
-    }
+    Serial.readBytesUntil('\0', Temp, sizeof(Temp));
+    txPacket.msg[sizeof(Temp)-1] = '\0';
   }
   int T = 0;
   
   // Convert String to output format txPacket.msg
-  if(sizeof(Temp) < 59)
+  for(int i = 0 ; i < 59 - 1 ; i++ )
   {
-    for(int i = 0 ; i < sizeof(Temp) ; i++ )
-    {
-      txPacket.msg[i] = Temp[i];
-    }
-    for(int i = sizeof(Temp)+1 ; i < 59 ; i++ )
-    {
-      txPacket.msg[i] = ' ';
-    }
+    txPacket.msg[i] = Temp[i];
   }
-  if(sizeof(Temp) >= 59)
-  {
-    for(int i = 0 ; i < 59 ; i++ )
-    {
-      txPacket.msg[i] = Temp[i];
-    }
-  }
+    
+  
   Serial.print("Transmitting: \"");
   digitalWrite(LED[3], HIGH);
   Serial.print((char*) txPacket.msg);
