@@ -6,8 +6,8 @@
 
 struct sPacket
 {
-  uint8_t node;
-  uint8_t msg[59];
+  char node;
+  char msg[59];
 };
 
 struct sPacket txPacket;
@@ -76,7 +76,7 @@ void printTxData()
 void loop()
 {
   
-  
+  //Start scanning the air for signals.
   Serial.println("Scan");
   
   digitalWrite(LED[0], HIGH);
@@ -92,27 +92,19 @@ void loop()
   
   
   
-  
+  // Begin Trasmit process
   Serial.println("Transmit");
   Serial.println("5 seconds to enter message");
   delay(5000);
   Serial.println("Loading...");
 
-  
+  // Grab input from console.
   if(Serial.available() > 0)
   {
-    Serial.readBytesUntil('\0', Temp, sizeof(Temp));
-    txPacket.msg[sizeof(Temp)-1] = '\0';
+    int numRead = Serial.readBytesUntil('\0', txPacket.msg, sizeof(txPacket.msg));
+    txPacket.msg[numRead] = '\0';
   }
-  int T = 0;
-  
-  // Convert String to output format txPacket.msg
-  for(int i = 0 ; i < 59 - 1 ; i++ )
-  {
-    txPacket.msg[i] = Temp[i];
-  }
-    
-  
+
   Serial.print("Transmitting: \"");
   digitalWrite(LED[3], HIGH);
   Serial.print((char*) txPacket.msg);
